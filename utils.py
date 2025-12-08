@@ -1,6 +1,4 @@
-"""
-Utility functions for Resume Ranking System
-"""
+
 import logging
 import re
 from typing import List, Dict, Any
@@ -10,8 +8,7 @@ from config import MAX_RESUMES_PER_REQUEST
 
 
 def setup_logging():
-    """Configure logging for the application"""
-    # Use StreamHandler for AWS Lambda (logs to CloudWatch)
+
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
@@ -26,15 +23,7 @@ logger = setup_logging()
 
 
 def validate_request(data: Dict[str, Any]) -> tuple[bool, str]:
-    """
-    Validate incoming API request
 
-    Args:
-        data: Request JSON data
-
-    Returns:
-        Tuple of (is_valid, error_message)
-    """
     if not data:
         return False, "Request body is empty"
 
@@ -76,15 +65,7 @@ def validate_request(data: Dict[str, Any]) -> tuple[bool, str]:
 
 
 def clean_text(text: str) -> str:
-    """
-    Clean and normalize text
 
-    Args:
-        text: Raw text
-
-    Returns:
-        Cleaned text
-    """
     if not text:
         return ""
 
@@ -98,15 +79,7 @@ def clean_text(text: str) -> str:
 
 
 def extract_years_of_experience(text: str) -> float:
-    """
-    Extract years of experience from text
 
-    Args:
-        text: Resume text
-
-    Returns:
-        Estimated years of experience
-    """
     patterns = [
         r'(\d+)\+?\s*years?\s+of\s+experience',
         r'(\d+)\+?\s*yrs?\s+experience',
@@ -135,16 +108,7 @@ def extract_years_of_experience(text: str) -> float:
 
 
 def format_error_response(error_message: str, status_code: int = 400) -> tuple:
-    """
-    Format error response
 
-    Args:
-        error_message: Error message
-        status_code: HTTP status code
-
-    Returns:
-        Tuple of (response_dict, status_code)
-    """
     return {
         "error": error_message,
         "success": False
@@ -152,16 +116,7 @@ def format_error_response(error_message: str, status_code: int = 400) -> tuple:
 
 
 def format_success_response(ranked_resumes: List[Dict], total_processed: int) -> Dict:
-    """
-    Format success response
 
-    Args:
-        ranked_resumes: List of ranked resume data
-        total_processed: Total number of resumes processed
-
-    Returns:
-        Response dictionary
-    """
     return {
         "success": True,
         "total_resumes_processed": total_processed,
