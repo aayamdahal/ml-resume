@@ -11,11 +11,11 @@ from config import MAX_RESUMES_PER_REQUEST
 
 def setup_logging():
     """Configure logging for the application"""
+    # Use StreamHandler for AWS Lambda (logs to CloudWatch)
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
         handlers=[
-            logging.FileHandler('resume_ranker.log'),
             logging.StreamHandler()
         ]
     )

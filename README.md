@@ -9,8 +9,13 @@ AI-powered resume ranking system using Sentence-BERT for semantic matching.
 - Experience level analysis
 - Support for PDF and DOCX files
 - Two upload methods: direct file upload or base64 encoding
+- **AWS Lambda deployment support**
 
-## Installation
+## Deployment Options
+
+### Option 1: Local Development
+
+#### Installation
 
 ```bash
 cd resume-ml
@@ -19,15 +24,82 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-## Usage
-
-### Start the API
+#### Start the API
 
 ```bash
 python app.py
 ```
 
 Server runs at: `http://localhost:5000`
+
+### Option 2: AWS Lambda (Serverless)
+
+Deploy to AWS Lambda for serverless, scalable execution.
+
+#### Prerequisites
+
+- AWS CLI installed and configured (`aws configure`)
+- Docker installed
+- AWS account with appropriate permissions
+
+#### Quick Deploy
+
+```bash
+chmod +x deploy_lambda.sh
+./deploy_lambda.sh
+```
+
+This script will:
+
+1. Create an ECR repository
+2. Build a Docker image
+3. Push to ECR
+4. Create/update Lambda function
+5. Configure with 3GB memory and 5-minute timeout
+
+#### Manual Lambda Deployment
+
+1. **Build Docker Image:**
+
+```bash
+docker build -t resume-ranking-api .
+```
+
+2. **Tag and Push to ECR:**
+
+```bash
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin YOUR_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com
+docker tag resume-ranking-api:latest YOUR_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/resume-ranking-api:latest
+docker push YOUR_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/resume-ranking-api:latest
+```
+
+3. **Create Lambda Function:**
+
+```bash
+aws lambda create-function \
+  --function-name resume-ranking-function \
+  --package-type Image \
+  --code ImageUri=YOUR_ACCOUNT_ID.dkr.ecr.us-east-1.amazonaws.com/resume-ranking-api:latest \
+  --role arn:aws:iam::YOUR_ACCOUNT_ID:role/lambda-execution-role \
+  --timeout 300 \
+  --memory-size 3008
+```
+
+#### Test Lambda Function
+
+```bash
+aws lambda invoke \
+  --function-name resume-ranking-function \
+  --payload file://test_payload.json \
+  response.json
+```
+
+#### Lambda Configuration
+
+- **Memory:** 3008 MB (recommended for ML models)
+- **Timeout:** 300 seconds (5 minutes)
+- **Handler:** `lambda_handler.lambda_handler`
+- **Runtime:** Python 3.13 (via Docker)
 
 ### API Endpoints
 
