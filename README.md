@@ -4,12 +4,13 @@ AI-powered resume ranking system using Sentence-BERT for semantic matching.
 
 ## Features
 
-- Semantic similarity matching using Sentence-BERT
-- Skills extraction and matching
-- Experience level analysis
-- Support for PDF and DOCX files
-- Two upload methods: direct file upload or base64 encoding
-- **AWS Lambda deployment support**
+- **AI-Powered Ranking:** Semantic similarity matching using Sentence-BERT (all-MiniLM-L6-v2)
+- **S3 Integration:** Automatically fetches and processes resumes from an S3 bucket
+- **Skills Extraction:** Identifies technical skills and matches them against job requirements
+- **Experience Analysis:** Calculates years of experience
+- **Multi-Format Support:** Processes both PDF and DOCX files
+- **Serverless:** Deployed on AWS Lambda with Docker
+- **Fast Performance:** Pre-loaded AI model for minimized cold start times
 
 ## Deployment Options
 
@@ -103,45 +104,51 @@ aws lambda invoke \
 
 ### API Endpoints
 
-#### 1. File Upload (Recommended)
+#### 1. S3 Bucket Processing (Recommended)
 
-**POST** `/rank_resumes_upload`
+**POST** `/` (Lambda Function URL)
 
-Upload PDF/DOCX files directly using multipart/form-data.
-
-**Parameters:**
-
-- `job_description` (text) - Job description (min 50 chars)
-- `resumes` (file) - PDF/DOCX files
-- `top_k` (text, optional) - Number of top results (default: 10)
-
-**Example (Postman):**
-
-1. Select POST method
-2. URL: `http://localhost:5000/rank_resumes_upload`
-3. Body → form-data
-4. Add `job_description` (Text)
-5. Add `resumes` (File) - select your PDF/DOCX files
-6. Send
-
-#### 2. Base64 Upload
-
-**POST** `/rank_resumes`
-
-Send base64-encoded files in JSON format.
+Processes all resumes stored in the configured S3 bucket.
 
 **Request Body:**
 
 ```json
 {
-  "job_description": "Your job description here",
+  "job_description": "Looking for a Full Stack Developer with React, Node.js, and AWS experience",
+  "s3_bucket": "kaam-ai", // Optional if configured in env vars
+  "top_k": 10
+}
+```
+
+**How it works:**
+
+1. The Lambda function lists all PDF/DOCX files in the `kaam-ai` bucket.
+2. It downloads and extracts text from each resume.
+3. It compares them against the `job_description` using the AI model.
+4. It returns the ranked list of candidates.
+
+#### 2. File Upload (Multipart)
+
+Upload PDF/DOCX files directly using multipart/form-data.
+
+**Parameters:**
+
+- `job_description` (text)
+- `resumes` (file) - Multiple files allowed
+
+#### 3. Base64 Upload (JSON)
+
+Send base64-encoded files in JSON format.
+
+```json
+{
+  "job_description": "...",
   "resumes": [
     {
-      "file_base64": "base64_encoded_content",
+      "file_base64": "...",
       "file_type": "pdf"
     }
-  ],
-  "top_k": 10
+  ]
 }
 ```
 
