@@ -202,7 +202,3 @@ Send base64-encoded files in JSON format.
 - pdfplumber
 - python-docx
 - scikit-learn
-
-## License
-
-MIT
